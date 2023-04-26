@@ -1,6 +1,6 @@
 {
   "name": "mssql-data-source",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A powerful MSSQL DataSource that integrates well with Apollo Server 4.",
   "keywords": [
     "mssql",
@@ -16,8 +16,9 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "files": [
-    "dist/src/lib/**/*.js",
-    "dist/src/lib/**/*.d.ts"
+    "dist/src/**/*.js",
+    "dist/src/**/*.ts",
+    "dist/src/**/*.map"
   ],
   "scripts": {
     "build": "tsc",

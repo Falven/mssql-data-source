@@ -17,19 +17,107 @@ pnpm install mssql-data-source
 
 ## Usage
 
-To use the library, import the MSSQLDataSource class and create an instance of it with your database configuration.
+To use the library, simply import the MSSQLDataSource class and either initalize it with your configuration information and use it directly in your resolvers, or subclass/compose it to add any additional required functionality.
+
+Here's an example that covers using the Stored procedure Querying functionality of the library in an Apollo GraphQL Server.
+
+1. First, we'll need to set up our GraphQL schema to support the stored procedure we want to execute.
+
+```graphql
+import { gql } from 'graphql-tag';
+
+export const typeDefs = gql`#graphql
+"""
+Define our Person type.
+"""
+type Person {
+  firstName: String!
+  middleName: String
+  lastName: String!
+}
+
+"""
+Define our stored procedure input arguments type.
+The framework will convert these properties to parameters sent to your stored procedure (MyStoredProcedure).
+The framework supports optional stored procedure parameters. Optional parameters may be omitted from the schema.
+"""
+input MyStoredProcedureInput {
+  page: Int
+  pageSize: Int
+  pageCount: Int # Our output parameter.
+}
+
+"""
+Define our Stored Procedure Result type.
+Represents the results from executing the MyStoredProcedure stored procedure.
+"""
+type MyStoredProcedureResult {
+  """
+  The result sets from the stored procedure. In this example, we only care about the first result set (array).
+  However, The framework will automatically map the result sets to the resultSets property.
+  You can define the types for each result set in this property to get typed results for each.
+  """
+  resultSets: [[Person!]!]!
+  """
+  The PageCount Output parameter from our Stored Procedure.
+  The framework will automatically map the output parameters and their values as properties of your Result type.
+  """
+  pageCount: Int
+  # ... any other output parameters/scalars you want to return from your stored procedure.
+}
+
+type Query {
+  """
+  Define our Stored Procedure Query
+  """
+  executeMyStoredProcedure(input: MyStoredProcedureInput): MyStoredProcedureResult!
+}
+
+schema {
+  query: Query
+}
+`;
+```
+
+2. Next, we'll need to set up our data source and resolvers. (I recommend using [graphql-codegen](https://github.com/dotansimha/graphql-code-generator) to automatically generate types for our GraphQL Resolvers and Types from our schema)
 
 ```ts
-import { MSSQLDataSource } from 'mssql-data-source';
+import {
+  Person,
+  MyStoredProcedureInput,
+  MyStoredProcedureResult,
+  executeMyStoredProcedure,
+  Resolvers,
+} from 'my/generated/types';
 
-const config = {
-  server: 'your_server',
-  database: 'your_database',
-  user: 'your_user',
-  password: 'your_password',
+import {
+  MSSQLDataSource,
+  DevConsoleLogger,
+  type IResolverProcedureResult,
+} from 'mssql-data-source';
+
+const connectionString = '...';
+
+const resolvers: Resolvers = {
+  Query: {
+    executeMyStoredProcedure: async (
+      _,
+      args: MyGraphQLInputArguments,
+      context: MyContext,
+    ): Promise<IResolverProcedureResult<Person>> => {
+      const input = args.input;
+      if (input === undefined) {
+        return { resultSets: [[]] };
+      }
+      return await context
+        .dataSources()
+        .adminDatabase.executeStoredProcedureQuery(
+          '[dbo].[My_Stored_Procedure]',
+          input as StoredProcedureInput,
+        );
+    },
+  },
 };
-
-const dataSource = new MSSQLDataSource(config);
 ```
 
 ## Executing Stored Procedures
