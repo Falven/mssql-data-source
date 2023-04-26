@@ -8,12 +8,12 @@ import {
 
 import {
   type DriverType,
-  type PreparedParameter,
+  type PreparedStoredProcedureParameter,
   ParameterMode,
-  type StoredProcedureInput,
   type StoredProcedureSchema,
   type StoredProcedureParameter,
   type ILogger,
+  type InputParameters,
 } from '../types';
 import { mapDbTypeToDriverType } from '../utils';
 import { logPerformance } from '../logging';
@@ -48,7 +48,7 @@ export class StoredProcedureManager {
    */
   public async executeStoredProcedure<T>(
     storedProcedureName: string,
-    input: StoredProcedureInput,
+    input: InputParameters,
     request: Request,
     logger: ILogger,
   ): Promise<IResolverProcedureResult<T>> {
@@ -94,10 +94,10 @@ export class StoredProcedureManager {
 
   private prepareParameters(
     storedProcedureParameters: IterableIterator<StoredProcedureParameter>,
-    input: StoredProcedureInput,
-  ): Map<string, PreparedParameter> {
+    input: InputParameters,
+  ): Map<string, PreparedStoredProcedureParameter> {
     // We want to use the inferred DB Stored Procedure schema as the source of truth.
-    const preparedParameters = new Map<string, PreparedParameter>();
+    const preparedParameters = new Map<string, PreparedStoredProcedureParameter>();
     for (const spParameter of storedProcedureParameters) {
       const { name, type, length, precision, scale, ...rest } = spParameter;
       const parameterName = name.slice(1);
@@ -129,8 +129,8 @@ export class StoredProcedureManager {
   }
 
   private getMissingRequiredParameters(
-    parameters: Map<string, PreparedParameter>,
-  ): PreparedParameter[] {
+    parameters: Map<string, PreparedStoredProcedureParameter>,
+  ): PreparedStoredProcedureParameter[] {
     // Check what required parameters are missing.
     const missingRequiredParameters = [];
     for (const parameter of parameters.values()) {
@@ -143,7 +143,7 @@ export class StoredProcedureManager {
   }
 
   private addParametersToRequest(
-    parameters: Map<string, PreparedParameter>,
+    parameters: Map<string, PreparedStoredProcedureParameter>,
     request: Request,
   ): Request {
     const preparedRequest = request;
@@ -170,7 +170,7 @@ export class StoredProcedureManager {
    */
   private prepareStoredProcedureRequest(
     storedProcedureParameters: IterableIterator<StoredProcedureParameter>,
-    input: StoredProcedureInput,
+    input: InputParameters,
     request: Request,
   ): Request {
     const parameters = this.prepareParameters(storedProcedureParameters, input);

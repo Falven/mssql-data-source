@@ -8,12 +8,7 @@ import {
   StoredProcedureCacheManager,
   StoredProcedureMetadataManager,
 } from '../stored-procedure';
-import type {
-  StoredProcedureInput,
-  MSSQLOptions,
-  ILogger,
-  IResolverProcedureResult,
-} from '../types';
+import type { MSSQLOptions, ILogger, IResolverProcedureResult, InputParameters } from '../types';
 
 /**
  * A GraphQL DataSource backed by a Microsoft SQL Server database.
@@ -81,7 +76,7 @@ export class MSSQLDataSource {
    */
   public async executeStoredProcedureQuery<T>(
     storedProcedureName: string,
-    input: StoredProcedureInput,
+    input: InputParameters,
   ): Promise<IResolverProcedureResult<T>> {
     const startTime = performance.now();
     const logger = this._queryLogger;
@@ -113,7 +108,7 @@ export class MSSQLDataSource {
    */
   public async executeStoredProcedureMutation<T>(
     storedProcedureName: string,
-    input: StoredProcedureInput,
+    input: InputParameters,
   ): Promise<IResolverProcedureResult<T>> {
     const startTime = performance.now();
     const logger = this._mutationLogger;
