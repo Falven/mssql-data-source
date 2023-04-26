@@ -82,27 +82,32 @@ schema {
 2. Next, we'll need to set up our data source and resolvers. (I recommend using [graphql-codegen](https://github.com/dotansimha/graphql-code-generator) to automatically generate types for our GraphQL Resolvers and Types from our schema)
 
 ```ts
+/**
+ * graphql-codegen generates this argument type using the typescript-resolvers plugin.
+ */
+export type QueryExecuteMyStoredProcedureArgs = {
+  input?: InputMaybe<MyStoredProcedureInput>;
+};
+
 import {
-  Person,
-  MyStoredProcedureInput,
-  MyStoredProcedureResult,
-  executeMyStoredProcedure,
-  Resolvers,
+  Person, // Our Person type from our schema (generated).
+  MyStoredProcedureInput, // Our input type from our schema (generated).
+  MyStoredProcedureResult, // Our result type from our schema (generated).
+  QueryExecuteMyStoredProcedureArgs, // Our arguments type (generated).
+  Resolvers, // Our Resolvers type (generated).
 } from 'my/generated/types';
 
 import {
-  MSSQLDataSource,
-  DevConsoleLogger,
-  type IResolverProcedureResult,
+  MSSQLDataSource, // The main data source class.
+  DevConsoleLogger, // A built-in logger that logs to the console on Dev environments.
+  type IResolverProcedureResult, // The type for the result of a stored procedure.
 } from 'mssql-data-source';
-
-const connectionString = '...';
 
 const resolvers: Resolvers = {
   Query: {
     executeMyStoredProcedure: async (
       _,
-      args: MyGraphQLInputArguments,
+      args: QueryExecuteMyStoredProcedureArgs,
       context: MyContext,
     ): Promise<IResolverProcedureResult<Person>> => {
       const input = args.input;
@@ -111,47 +116,152 @@ const resolvers: Resolvers = {
       }
       return await context
         .dataSources()
-        .adminDatabase.executeStoredProcedureQuery(
+        .myDatabase.executeStoredProcedureQuery(
           '[dbo].[My_Stored_Procedure]',
-          input as StoredProcedureInput,
+          input as MyStoredProcedureInput,
         );
     },
   },
 };
+
+interface MyContext extends BaseContext {
+  dataSources: () => {
+    myDatabase: MSSQLDataSource;
+  };
+}
+
+const server = new ApolloServer<MyContext>({
+  typeDefs,
+  resolvers,
+});
+
+const connectionString = '...';
+
+const { url } = await startStandaloneServer(server, {
+  listen: { port: 5001 },
+  context: async ({ req }) => ({
+    dataSources: () => {
+      if (!connectionString) {
+        throw new Error('DATABASE_CONNECTION_STRING environment variable is not set.');
+      }
+
+      const logger = new DevConsoleLogger();
+      return {
+        adminDatabase: new MSSQLDataSource(
+          // Our Query configuration.
+          {
+            config: connectionString,
+            logger: logger,
+          },
+          // Our mutation configuration.
+          {
+            config: connectionString,
+            logger: logger,
+          },
+        ),
+      };
+    },
+  }),
+});
 ```
 
-## Executing Stored Procedures
+That's it! Let's execute it.
 
-You can execute stored procedures using the executeStoredProcedure method.
+## Executing Our Stored Procedure
 
-```ts
-const storedProcedureName = 'YourStoredProcedure';
-const parameters = {
-  param1: 'value1',
-  param2: 'value2',
-};
-
-const result = await dataSource.executeStoredProcedure(storedProcedureName, parameters);
-```
+![Example Postman invocation.](/assets/images/Postman.png)
 
 ## Logging
 
 You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource constructor.
 
-```ts
-import { ILogger, MSSQLDataSource } from 'mssql-data-source';
+## Performance
 
-class MyCustomLogger implements ILogger {
-  log(message: string): void {
-    // Your custom logging implementation
-  }
-  error(message: string): void {
-    // Your custom error logging implementation
-  }
+The MSSQLDataSource class maintains separate connection pools for Query and Mutation operations. This ensures that your Query operations don't get blocked by long-running Mutation operations. It also ensures that your Mutation operations don't get blocked by long-running Query operations. This is especially important when using stored procedures that may take a long time to execute.
+
+Because the MSSQLDataSource class needs schema and object definition information to determine stored procedure parameter optionality and modes (input vs output), it must query the database for this information. This is done once per stored procedure and cached for subsequent requests. By default, schemas are cached for 1 hour. This means that the first request to a stored procedure will be slower than subsequent requests. This is a one-time cost and is well worth the benefit of use.
+
+### Apollo Server caching
+
+To maximize the performance of your service, I would recommended you implement Apollo Server Caching. This can be easily implemented by including a plugin and adding some `@cacheControl` directives to your schema.
+
+```graphql
+import { gql } from 'graphql-tag';
+
+export const typeDefs = gql`#graphql
+"""
+Define our Person type.
+"""
+type Person {
+  firstName: String!
+  middleName: String
+  lastName: String!
 }
 
-const dataSource = new MSSQLDataSource(config, new MyCustomLogger());
+"""
+Define our stored procedure input arguments type.
+The framework will convert these properties to parameters sent to your stored procedure (MyStoredProcedure).
+The framework supports optional stored procedure parameters. Optional parameters may be omitted from the schema.
+"""
+input MyStoredProcedureInput {
+  page: Int
+  pageSize: Int
+  pageCount: Int # Our output parameter.
+}
+
+"""
+Define our Stored Procedure Result type.
+Represents the results from executing the MyStoredProcedure stored procedure.
+"""
+type MyStoredProcedureResult @cacheControl(maxAge: 240) {
+  """
+  The result sets from the stored procedure. In this example, we only care about the first result set (array).
+  However, The framework will automatically map the result sets to the resultSets property.
+  You can define the types for each result set in this property to get typed results for each.
+  """
+  resultSets: [[Person!]!]! @cacheControl(maxAge: 240)
+  """
+  The PageCount Output parameter from our Stored Procedure.
+  The framework will automatically map the output parameters and their values as properties of your Result type.
+  """
+  pageCount: Int @cacheControl(maxAge: 240)
+  # ... any other output parameters/scalars you want to return from your stored procedure.
+}
+
+type Query {
+  """
+  Define our Stored Procedure Query
+  """
+  executeMyStoredProcedure(input: MyStoredProcedureInput): MyStoredProcedureResult!
+}
+
+schema {
+  query: Query
+}
+`;
 ```
+
+```ts
+import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl';
+
+const server = new ApolloServer<MyContext>({
+  typeDefs,
+  resolvers,
+  plugins: [ApolloServerPluginCacheControl()],
+});
+```
+
+[See the latest Apollo Docs for more detailed information on implementing operation result caching.](https://www.apollographql.com/docs/apollo-server/performance/caching/).
+
+When used in conjunction with Apollo Server caching, you have a lightning fast solution with all of the power of GraphQL operations and the safety of Stored Procedures. Apollo Caches your query and subquery results, while MSSQLDataSource caches your stored procedure metadata and Database connections.
+
+## Future Plans
+
+- Add better support for more complex stored procedure result set types.
+- Use a T-SQL Parser instead of a regular expression to parse the Stored Procedure definition.
+- Add schema caching configuration options.
+- Add support for Table-Valued Parameters.
+- Add support for User-Defined Table Types.
 
 ## Documentation
 
