@@ -1,28 +1,8 @@
-import type { ConnectionPool, Request } from 'mssql/msnodesqlv8';
-
-import type { ConnectionManager } from '../utils';
+import type { Request } from 'mssql/msnodesqlv8';
 
 import type { ILogger } from '.';
 
 export interface IDatabaseExecutor {
-  constructor: (_connectionManager: ConnectionManager) => IDatabaseExecutor;
-
-  /**
-   * Executes the given request function with a new Request instance
-   * using the appropriate ConnectionPool for the resolver type.
-   * This method ensures the ConnectionPool is connected before
-   * invoking the request function.
-   *
-   * @param {Promise<ConnectionPool>} connectionPool The function to be executed to get the ConnectionPool
-   * @param {(request: Request) => Promise<T>} requestFn The function to be executed with the new Request instance
-   * @returns The result of the request function
-   */
-  executeRequest: <T>(
-    connectionPool: Promise<ConnectionPool>,
-    requestFn: (request: Request) => Promise<T>,
-    logger: ILogger,
-  ) => Promise<T>;
-
   /**
    * Executes the given request function for a query operation
    * with a new Request instance using the appropriate ConnectionPool.

@@ -1,9 +1,6 @@
-import { InMemoryLRUCache, type KeyValueCache } from '@apollo/utils.keyvaluecache';
 import { ConnectionPool } from 'mssql/msnodesqlv8';
 
 import type { MSSQLConfig } from '../types';
-
-import { CacheHelper } from '.';
 
 /**
  * Whether the given config is a string or not.
@@ -15,78 +12,53 @@ export const isConfigString = (config: MSSQLConfig): config is string => {
 };
 
 /**
- * A class for managing the global connection pool caches for the Query and Mutation data sources.
+ * A class for managing the global connection pools for the Query and Mutation data sources.
  */
 export class ConnectionManager {
-  private static _globalQueryPoolCache: CacheHelper<ConnectionPool> | undefined;
-  private static _globalMutationPoolCache: CacheHelper<ConnectionPool> | undefined;
+  private static _queryConfig: MSSQLConfig;
+  private static _mutationConfig: MSSQLConfig;
+  private static _globalQueryPool: ConnectionPool | undefined;
+  private static _globalMutationPool: ConnectionPool | undefined;
 
   /**
    * Constructs a new ConnectionManager instance.
-   * @param {MSSQLConfig} _queryConfig The config to be used for the Query data source
-   * @param {MSSQLConfig} _mutationConfig The config to be used for the Mutation data source
+   * @param {MSSQLConfig} queryConfig The config to be used for the Query data source
+   * @param {MSSQLConfig} mutationConfig The config to be used for the Mutation data source
    */
-  constructor(
-    private readonly _queryConfig: MSSQLConfig,
-    private readonly _mutationConfig: MSSQLConfig,
-  ) {}
-
-  /**
-   * Returns the global connection pool cache for the Query data source.
-   */
-  public get queryConnectionPool(): Promise<ConnectionPool> {
-    return this.getConnectionPool(this._queryConfig, ConnectionManager.globalQueryPoolCache);
+  constructor(queryConfig: MSSQLConfig, mutationConfig: MSSQLConfig) {
+    if (ConnectionManager._queryConfig === undefined) {
+      ConnectionManager._queryConfig = queryConfig;
+    }
+    if (ConnectionManager._mutationConfig === undefined) {
+      ConnectionManager._mutationConfig = mutationConfig;
+    }
   }
 
   /**
-   * Returns the global connection pool cache for the Mutation data source.
+   * Returns the global query connection pool.
    */
-  public get mutationConnectionPool(): Promise<ConnectionPool> {
-    return this.getConnectionPool(this._mutationConfig, ConnectionManager.globalMutationPoolCache);
-  }
-
-  private static get defaultConnectionPoolCacheOptions(): KeyValueCache<ConnectionPool> {
-    return new InMemoryLRUCache({
-      // Default TTL is 360000 ms or 1 hour.
-      ttl: 60 * 60 * 1000,
-      ttlAutopurge: false,
-      // Default max size is 1000.
-      maxSize: 1000,
-    });
-  }
-
-  private static get globalQueryPoolCache(): CacheHelper<ConnectionPool> {
-    if (this._globalQueryPoolCache === undefined) {
-      this._globalQueryPoolCache = new CacheHelper(
-        ConnectionManager.defaultConnectionPoolCacheOptions,
+  public get queryConnectionPool(): ConnectionPool {
+    if (ConnectionManager._globalQueryPool === undefined) {
+      ConnectionManager._globalQueryPool = this.createConnectionPool(
+        ConnectionManager._queryConfig,
       );
     }
-    return this._globalQueryPoolCache;
+    return ConnectionManager._globalQueryPool;
   }
 
-  private static get globalMutationPoolCache(): CacheHelper<ConnectionPool> {
-    if (this._globalMutationPoolCache === undefined) {
-      this._globalMutationPoolCache = new CacheHelper<ConnectionPool>(
-        ConnectionManager.defaultConnectionPoolCacheOptions,
+  /**
+   * Returns the global mutation connection pool.
+   */
+  public get mutationConnectionPool(): ConnectionPool {
+    if (ConnectionManager._globalMutationPool === undefined) {
+      ConnectionManager._globalMutationPool = this.createConnectionPool(
+        ConnectionManager._mutationConfig,
       );
     }
-    return this._globalMutationPoolCache;
+    return ConnectionManager._globalMutationPool;
   }
 
-  private static createConnectionPool(config: MSSQLConfig): ConnectionPool {
+  private createConnectionPool(config: MSSQLConfig): ConnectionPool {
     return isConfigString(config) ? new ConnectionPool(config) : new ConnectionPool(config);
-  }
-
-  private async getConnectionPool(
-    config: MSSQLConfig,
-    cacheHelper: CacheHelper<ConnectionPool>,
-  ): Promise<ConnectionPool> {
-    const keyToHash = isConfigString(config) ? config : JSON.stringify(config);
-    let connectionPool = await cacheHelper.tryGetFromCache(keyToHash);
-    if (connectionPool === undefined) {
-      connectionPool = ConnectionManager.createConnectionPool(config);
-      await cacheHelper.addToCache(keyToHash, connectionPool);
-    }
-    return connectionPool;
   }
 }

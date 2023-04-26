@@ -1,10 +1,18 @@
 {
   "name": "mssql-data-source",
-  "version": "1.0.0",
-  "description": "",
-  "keywords": [],
-  "license": "ISC",
-  "author": "",
+  "version": "1.0.1",
+  "description": "A powerful MSSQL DataSource that integrates well with Apollo Server 4.",
+  "keywords": [
+    "mssql",
+    "apollo",
+    "stored procedure"
+  ],
+  "homepage": "https://github.com/Falven/mssql-data-source/tree/main",
+  "bugs": {
+    "url": "https://github.com/Falven/mssql-data-source/issues"
+  },
+  "license": "MIT",
+  "author": "Falven",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "files": [
@@ -38,5 +46,9 @@
     "eslint-plugin-promise": "^6.0.0",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Falven/mssql-data-source.git"
   }
 }
