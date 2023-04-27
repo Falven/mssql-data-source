@@ -8,6 +8,7 @@ A comprehensive, powerful Microsoft SQL Server Data Source that integrates easil
 - Separate Connection Pools for Query and Mutation operations maintain active Database connections to ensure optimal performance.
 - Built-in Stored procedure introspection. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
 - Extendable, straightforward architecture, Type-safe Typescript API and plenty of documentation.
+- Supports dynamic SQL. Gives you the flexibility to define your GraphQL and Database Schemas as you'd like. We'll take care of the rest.
 
 ## Installation
 
@@ -250,7 +251,7 @@ query ExecuteMyStoredProcedure($input: StoredProcedureInput) {
 
 ## Logging
 
-You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource constructor.
+You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration.
 
 ## Performance
 
