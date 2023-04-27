@@ -83,7 +83,7 @@ Here's an example that covers using the Stored procedure Querying functionality 
    ```
 
 3. Next, we'll need to set up our GraphQL schema to match the stored procedure we created.
-   Note: MSSQL Data Source does not care about the casing of your schema properties. Only that match the parameters. So you can use camelCase, PascalCase, or snake_case... It doesn't matter. Optional parameters are also supported, you can ommit these from your query.
+   Note: MSSQL Data Source does not care about the casing of your schema properties. Only that match the parameters. So you can use camelCase, PascalCase, or snake_case... It doesn't matter. Optional parameters are also supported, you can omit these from your query.
 
    ```gql
    import { gql } from 'graphql-tag';
