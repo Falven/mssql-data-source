@@ -13,7 +13,7 @@ As a result, I decided to create an MSSQL Data Source that simplifies querying a
 ## Features
 
 - Efficient implementation of [node-mssql](https://www.npmjs.com/package/mssql). Reuses DB connections (ConnectionPools), sanitizes SQL queries (tagged template literals), supports promises,  transactions, prepared statements, and others...
-- Implements Command Query Responsibility Segregation (CQRS) through separate configuration and connection pools for Query and Mutation operations.
+- Implements Command Query Responsibility Segregation (CQRS) through separate connection pools for Query and Mutation operations.
 - Separate configuration for Query and Mutation operations. Can connect to separate databases, use different credentials, log to separate sources, etc.
 - Stored Procedure schema introspection abstracts away the logic required to execute Stored Procedures. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
 - Extendable, straightforward architecture and integration with Apollo. Easy to add business-layer functionality to query Microsoft SQL Server Databases without using the Knex abstraction.
