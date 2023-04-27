@@ -8,14 +8,15 @@ I was searching for a suitable data source for an enterprise project that requir
 
 I came across [SQLDataSource](https://github.com/cvburgess/SQLDataSource) in the Apollo documentation, but it uses Knex under the hood, which doesn't work well with stored procedures and [adds an extra unnecessary abstraction layer on top of SQL](https://gajus.medium.com/stop-using-knex-js-and-earn-30-bf410349856c). I also found the [Slonik client](https://github.com/gajus/slonik), but it's only compatible with PostgreSQL databases.
 
-As a result, I decided to create an MSSQL Data Source that simplifies querying and mutating stored procedure data while allowing you to focus on your GraphQL and SQL schemas. I also wanted to make it extendible and ensure it supports all the necessary caching and optimizations necessary in an enterprise environment, so I've implemented those features as well. For more information, you can check out the [README.md](https://github.com/Falven/mssql-data-source/blob/main/README.md) file on the project's GitHub repository.
+As a result, I decided to create an MSSQL Data Source that simplifies querying and mutating stored procedure data while allowing you to focus on your GraphQL and SQL schemas. I also wanted to make it extendible and ensure it supports all the  optimizations (caching, reusing connections, etc.) necessary in an enterprise environment, so I've implemented those features as well. For more information, you can check out the [README.md](https://github.com/Falven/mssql-data-source/blob/main/README.md) file on the project's GitHub repository.
 
 ## Features
 
+- Efficient implementation of [node-mssql](https://www.npmjs.com/package/mssql). Reuses DB connections (ConnectionPools), sanitizes SQL queries (tagged template literals), supports promises,  transactions, prepared statements, and others...
+- Implements Command Query Responsibility Segregation (CQRS) through separate configuration and connection pools for Query and Mutation operations.
 - Separate configuration for Query and Mutation operations. Can connect to separate databases, use different credentials, log to separate sources, etc.
-- Separate Connection Pools for Query and Mutation operations maintain active Database connections to ensure optimal performance.
-- Built-in Stored procedure introspection. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
-- Extendable, straightforward architecture, Type-safe Typescript API and plenty of documentation.
+- Stored Procedure schema introspection abstracts away the logic required to execute Stored Procedures. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
+- Extendable, straightforward architecture and integration with Apollo. Easy to add business-layer functionality to query Microsoft SQL Server Databases without using the Knex abstraction.
 - Supports dynamic SQL. Gives you the flexibility to define your GraphQL and Database Schemas as you'd like. We'll take care of the rest.
 
 ## Installation
