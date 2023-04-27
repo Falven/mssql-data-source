@@ -265,7 +265,7 @@ You can customize logging by implementing your own logger that adheres to the IL
 
 The MSSQLDataSource class maintains separate connection pools for Query and Mutation operations. This ensures that your Query operations don't get blocked by long-running Mutation operations. It also ensures that your Mutation operations don't get blocked by long-running Query operations. This is especially important when using stored procedures that may take a long time to execute.
 
-Because the MSSQLDataSource class needs schema and object definition information to determine stored procedure parameter optionality and modes (input vs output), it must query the database for this information. This is done once per stored procedure and cached for subsequent requests. By default, schemas are cached for 1 hour. This means that the first request to a stored procedure will be slower than subsequent requests. This is a one-time cost and is well worth the benefit of use.
+Because the MSSQLDataSource class needs schema and object definition information to determine stored procedure parameter optionality and modes (input vs output), it must query the database for this information. This is done once per stored procedure and cached for subsequent requests. By default, schemas are cached for 1 hour. This means that the first request to a stored procedure will be slower than subsequent requests. This is a one-time cost and is well worth the benefits.
 
 ### Apollo Server caching
 
