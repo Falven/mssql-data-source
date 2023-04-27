@@ -277,20 +277,13 @@ To maximize the performance of your service, I would recommended you implement A
 import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`#graphql
-"""
-Define our Person type.
-"""
+
 type Person {
   firstName: String!
   middleName: String
   lastName: String!
 }
 
-"""
-Define our stored procedure input arguments type.
-The framework will convert these properties to parameters sent to your stored procedure (MyStoredProcedure).
-The framework supports optional stored procedure parameters. Optional parameters may be omitted from the schema.
-"""
 input MyStoredProcedureInput {
   page: Int
   pageSize: Int
@@ -298,28 +291,15 @@ input MyStoredProcedureInput {
 }
 
 """
-Define our Stored Procedure Result type.
-Represents the results from executing the MyStoredProcedure stored procedure.
+Caching our Stored Procedure result for 240 seconds (4 mins)
 """
 type MyStoredProcedureResult @cacheControl(maxAge: 240) {
-  """
-  The result sets from the stored procedure. In this example, we only care about the first result set (array).
-  However, The framework will automatically map the result sets to the resultSets property.
-  You can define the types for each result set in this property to get typed results for each.
-  """
   resultSets: [[Person!]!]! @cacheControl(maxAge: 240)
-  """
-  The RecordCount Output parameter from our Stored Procedure.
-  The framework will automatically map the output parameters and their values as properties of your Result type.
-  """
+
   recordCount: Int @cacheControl(maxAge: 240)
-  # ... any other output parameters/scalars you want to return from your stored procedure.
 }
 
 type Query {
-  """
-  Define our Stored Procedure Query
-  """
   executeMyStoredProcedure(input: MyStoredProcedureInput): MyStoredProcedureResult!
 }
 
