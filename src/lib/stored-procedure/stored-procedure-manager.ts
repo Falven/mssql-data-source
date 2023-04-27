@@ -16,7 +16,7 @@ import {
   type InputParameters,
 } from '../types';
 import { mapDbTypeToDriverType } from '../utils';
-import { logExecutionBegin, logExecutionEnd, logPerformance } from '../logging';
+import { logExecutionBegin, logExecutionEnd, logPerformance, logSafely } from '../logging';
 import {
   type StoredProcedureCacheManager,
   type StoredProcedureMetadataManager,
@@ -57,11 +57,22 @@ export class StoredProcedureManager {
       | IResult<StoredProcedureSchema>
       | undefined;
     if (schema === undefined) {
+      logSafely(
+        logger,
+        'info',
+        `\x1b[31mCache miss occurred while retrieving the cached schema for ${storedProcedureName}\x1b[0m`,
+      );
       schema = await this._storedProcedureMetadataManager.getStoredProcedureParameterSchema(
         storedProcedureName,
         logger,
       );
       await this._storedProcedureCacheManager.addToCache(storedProcedureName, schema);
+    } else {
+      logSafely(
+        logger,
+        'info',
+        `\x1b[32mCache hit occurred while retrieving the cached schema for ${storedProcedureName}\x1b[0m`,
+      );
     }
     logPerformance(logger, 'getStoredProcedureParameterSchema', startTime);
 

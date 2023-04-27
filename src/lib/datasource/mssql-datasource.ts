@@ -1,6 +1,6 @@
 import type { Request } from 'mssql/msnodesqlv8';
 
-import { DevConsoleLogger, logExecutionBegin, logExecutionEnd } from '../logging';
+import { DevConsoleLogger, logExecutionBegin, logExecutionEnd, logSafely } from '../logging';
 import { DatabaseExecutor } from '../executor';
 import { ConnectionManager } from '../utils';
 import {
@@ -95,6 +95,7 @@ export class MSSQLDataSource {
     );
 
     logExecutionEnd(logger, `Stored Procedure Query ${storedProcedureName}`, startTime);
+    logSafely(logger, 'info', `------------------`);
 
     return result;
   }

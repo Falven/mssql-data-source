@@ -45,12 +45,16 @@ export const logExecutionBegin = (
   logger: ILogger,
   fnName: string,
   fnInput: object,
-  ansiCode: string = '32m',
+  ansiCode: string = '36m',
 ): void => {
   logSafely(
     logger,
     'info',
-    `\u001b[${ansiCode}Begin executing ${fnName}: ${JSON.stringify(fnInput, null, 0)}\u001b[0m`,
+    `\u001b[${ansiCode}Starting execution of ${fnName}: ${JSON.stringify(
+      fnInput,
+      null,
+      0,
+    )}\u001b[0m`,
   );
 };
 
@@ -65,12 +69,12 @@ export const logExecutionEnd = (
   logger: ILogger,
   fnName: string,
   fnStartTime: number,
-  ansiCode: string = '32m',
+  ansiCode: string = '36m',
 ): void => {
   const elapsedTime = (performance.now() - fnStartTime).toFixed(2);
   logSafely(
     logger,
     'info',
-    `\u001b[${ansiCode}End execution of ${fnName} completed in ${elapsedTime}ms\u001b[0m`,
+    `\u001b[${ansiCode}Finished executing ${fnName} completed in ${elapsedTime}ms\u001b[0m`,
   );
 };
