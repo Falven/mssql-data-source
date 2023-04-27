@@ -8,11 +8,11 @@ I was searching for a suitable data source for an enterprise project that requir
 
 I came across [SQLDataSource](https://github.com/cvburgess/SQLDataSource) in the Apollo documentation, but it uses Knex under the hood, which doesn't contribute much to stored procedure execution and [adds an extra unnecessary abstraction layer on top of SQL](https://gajus.medium.com/stop-using-knex-js-and-earn-30-bf410349856c). I also found the [Slonik client](https://github.com/gajus/slonik), but it's only compatible with PostgreSQL databases.
 
-As a result, I decided to create an MSSQL Data Source that simplifies querying and mutating stored procedure data while allowing you to focus on your GraphQL and SQL schemas. I also wanted to make it extendible and ensure it supports all the  optimizations (caching, reusing connections, etc.) necessary in an enterprise environment, so I've implemented those features as well.
+As a result, I decided to create an MSSQL Data Source that simplifies querying and mutating stored procedure data while allowing you to focus on your GraphQL and SQL schemas. I also wanted to make it extendible and ensure it supports all the optimizations (caching, reusing connections, etc.) necessary in an enterprise environment, so I've implemented those features as well.
 
 ## Features
 
-- Efficient implementation of [node-mssql](https://www.npmjs.com/package/mssql). Reuses DB connections (ConnectionPools), sanitizes SQL queries (tagged template literals), supports promises,  transactions, prepared statements, and others...
+- Efficient implementation of [node-mssql](https://www.npmjs.com/package/mssql). Reuses DB connections (ConnectionPools), sanitizes SQL queries (tagged template literals), supports promises, transactions, prepared statements, and others...
 - Implements Command Query Responsibility Segregation (CQRS) through separate connection pools for Query and Mutation operations.
 - Separate configuration for Query and Mutation operations all you to connect to separate databases for queries and mutations, use different credentials, log to separate sources, etc.
 - Stored Procedure schema introspection abstracts away the logic required to execute Stored Procedures. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
@@ -92,8 +92,7 @@ Here's an example that covers using the Stored procedure Querying functionality 
    END;
    ```
 
-3. Next, we'll need to set up our GraphQL schema to match the stored procedure we created.
-   Note: MSSQL Data Source does not care about the casing of your schema properties. Only that match the parameters. So you can use camelCase, PascalCase, or snake_case... It doesn't matter. Optional parameters are also supported, you can omit these from your query.
+3. Next, we'll need to set up our GraphQL schema to match the stored procedure we created. Note: MSSQL Data Source does not care about the casing of your schema properties. Only that match the parameters. So you can use camelCase, PascalCase, or snake_case... It doesn't matter. Optional parameters are also supported, you can omit these from your query.
 
    ```gql
    import { gql } from 'graphql-tag';
@@ -260,7 +259,9 @@ query ExecuteMyStoredProcedure($input: StoredProcedureInput) {
 
 ## Logging
 
-You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration.
+You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration. It also comes with a built-in DevLogger that logs informational messages to the console in `tsNODE_ENV === 'development'` environments.
+
+![Example logs.](/assets/images/Logs.png)
 
 ## Performance
 
