@@ -259,7 +259,7 @@ query ExecuteMyStoredProcedure($input: StoredProcedureInput) {
 
 ## Logging
 
-You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration. It also comes with a default DevLogger that logs informational messages to the console in `NODE_ENV !== 'production'` environments.
+You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration. It also comes with a default `DevConsoleLogger` that logs informational messages to the console in `NODE_ENV !== 'production'` environments.
 
 ![Example logs.](/assets/images/Logs.png)
 
