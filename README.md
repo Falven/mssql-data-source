@@ -43,16 +43,6 @@ Here's an example that covers using the Stored procedure Querying functionality 
          ('Olivia', 'H', 'Miller'),
          ('Andrew', 'I', 'Wilson'),
          ('Isabella', 'J', 'Moore'),
-         ('Joshua', 'K', 'Taylor'),
-         ('Sophia', 'L', 'Anderson'),
-         ('David', 'M', 'Thomas'),
-         ('Ava', 'N', 'Jackson'),
-         ('Joseph', 'O', 'White'),
-         ('Mia', 'P', 'Harris'),
-         ('Matthew', 'Q', 'Martin'),
-         ('Abigail', 'R', 'Thompson'),
-         ('Anthony', 'S', 'Garcia'),
-         ('Ella', 'T', 'Martinez');
    ```
 
 2. Let's create our stored Procedure:
