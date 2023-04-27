@@ -294,7 +294,7 @@ The framework supports optional stored procedure parameters. Optional parameters
 input MyStoredProcedureInput {
   page: Int
   pageSize: Int
-  pageCount: Int # Our output parameter.
+  recordCount: Int # Our output parameter.
 }
 
 """
