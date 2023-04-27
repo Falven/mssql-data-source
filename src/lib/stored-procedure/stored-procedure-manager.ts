@@ -16,7 +16,7 @@ import {
   type InputParameters,
 } from '../types';
 import { mapDbTypeToDriverType } from '../utils';
-import { logPerformance } from '../logging';
+import { logExecutionBegin, logExecutionEnd, logPerformance } from '../logging';
 import {
   type StoredProcedureCacheManager,
   type StoredProcedureMetadataManager,
@@ -82,8 +82,14 @@ export class StoredProcedureManager {
     logPerformance(logger, 'prepareStoredProcedureRequest', startTime);
 
     startTime = performance.now();
+    logExecutionBegin(
+      logger,
+      `Stored Procedure ${storedProcedureName} with parameters`,
+      preparedRequest.parameters,
+      '33m',
+    );
     const result = await preparedRequest.execute(storedProcedureName);
-    logPerformance(logger, 'Request.execute', startTime);
+    logExecutionEnd(logger, `Stored Procedure ${storedProcedureName}`, startTime, '33m');
 
     startTime = performance.now();
     const preparedResult = this.prepareStoredProcedureResult(result);

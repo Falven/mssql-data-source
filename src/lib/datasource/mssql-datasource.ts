@@ -81,7 +81,7 @@ export class MSSQLDataSource {
     const startTime = performance.now();
     const logger = this._queryLogger;
 
-    logExecutionBegin(logger, `Stored Procedure Query ${storedProcedureName}`, input);
+    logExecutionBegin(logger, `Stored Procedure Query ${storedProcedureName} with inputs`, input);
 
     const result = await this._databaseExecutor.executeQueryRequest(
       async (request: Request): Promise<IResolverProcedureResult<T>> =>
