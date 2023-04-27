@@ -115,7 +115,7 @@ Here's an example that covers using the Stored procedure Querying functionality 
    input MyStoredProcedureInput {
      page: Int
      pageSize: Int
-     pageCount: Int # Our output parameter.
+     recordCount: Int # Our output parameter.
    }
 
    """
