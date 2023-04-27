@@ -8,7 +8,7 @@ I was searching for a suitable data source for an enterprise project that requir
 
 I came across [SQLDataSource](https://github.com/cvburgess/SQLDataSource) in the Apollo documentation, but it uses Knex under the hood, which doesn't contribute much to stored procedure execution and [adds an extra unnecessary abstraction layer on top of SQL](https://gajus.medium.com/stop-using-knex-js-and-earn-30-bf410349856c). I also found the [Slonik client](https://github.com/gajus/slonik), but it's only compatible with PostgreSQL databases.
 
-As a result, I decided to create an MSSQL Data Source that simplifies querying and mutating stored procedure data while allowing you to focus on your GraphQL and SQL schemas. I also wanted to make it extendible and ensure it supports all the  optimizations (caching, reusing connections, etc.) necessary in an enterprise environment, so I've implemented those features as well. For more information, you can check out the [README.md](https://github.com/Falven/mssql-data-source/blob/main/README.md) file on the project's GitHub repository.
+As a result, I decided to create an MSSQL Data Source that simplifies querying and mutating stored procedure data while allowing you to focus on your GraphQL and SQL schemas. I also wanted to make it extendible and ensure it supports all the  optimizations (caching, reusing connections, etc.) necessary in an enterprise environment, so I've implemented those features as well.
 
 ## Features
 
