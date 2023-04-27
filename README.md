@@ -2,12 +2,22 @@
 
 A comprehensive, powerful Microsoft SQL Server Data Source that integrates easily with Apollo Server. Simplifies efficiently connecting to and querying Microsoft SQL Server databases. Uses node-mssql under the hood. This library provides an easy-to-use API for executing stored procedures and building business layer functionality.
 
+## Backstory
+
+I was searching for a suitable data source for an enterprise project that required using Microsoft SQL Server/Database on Azure. Our customer's solution heavily depends on stored procedures for auditing and other side effects. We don't want to re-engineer them, but we're looking for a convenient way to query and integrate them with GraphQL.
+
+I came across [SQLDataSource](https://github.com/cvburgess/SQLDataSource) in the Apollo documentation, but it uses Knex under the hood, which doesn't contribute much to stored procedure execution and [adds an extra unnecessary abstraction layer on top of SQL](https://gajus.medium.com/stop-using-knex-js-and-earn-30-bf410349856c). I also found the [Slonik client](https://github.com/gajus/slonik), but it's only compatible with PostgreSQL databases.
+
+As a result, I decided to create an MSSQL Data Source that simplifies querying and mutating stored procedure data while allowing you to focus on your GraphQL and SQL schemas. I also wanted to make it extendible and ensure it supports all the  optimizations (caching, reusing connections, etc.) necessary in an enterprise environment, so I've implemented those features as well. For more information, you can check out the [README.md](https://github.com/Falven/mssql-data-source/blob/main/README.md) file on the project's GitHub repository.
+
 ## Features
 
+- Efficient implementation of [node-mssql](https://www.npmjs.com/package/mssql). Reuses DB connections (ConnectionPools), sanitizes SQL queries (tagged template literals), supports promises,  transactions, prepared statements, and others...
+- Implements Command Query Responsibility Segregation (CQRS) through separate configuration and connection pools for Query and Mutation operations.
 - Separate configuration for Query and Mutation operations. Can connect to separate databases, use different credentials, log to separate sources, etc.
-- Separate Connection Pools for Query and Mutation operations maintain active Database connections to ensure optimal performance.
-- Built-in Stored procedure introspection. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
-- Extendable, straightforward architecture, Type-safe Typescript API and plenty of documentation.
+- Stored Procedure schema introspection abstracts away the logic required to execute Stored Procedures. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
+- Extendable, straightforward architecture and integration with Apollo. Easy to add business-layer functionality to query Microsoft SQL Server Databases without using the Knex abstraction.
+- Supports dynamic SQL. Gives you the flexibility to define your GraphQL and Database Schemas as you'd like. We'll take care of the rest.
 
 ## Installation
 
@@ -43,16 +53,6 @@ Here's an example that covers using the Stored procedure Querying functionality 
          ('Olivia', 'H', 'Miller'),
          ('Andrew', 'I', 'Wilson'),
          ('Isabella', 'J', 'Moore'),
-         ('Joshua', 'K', 'Taylor'),
-         ('Sophia', 'L', 'Anderson'),
-         ('David', 'M', 'Thomas'),
-         ('Ava', 'N', 'Jackson'),
-         ('Joseph', 'O', 'White'),
-         ('Mia', 'P', 'Harris'),
-         ('Matthew', 'Q', 'Martin'),
-         ('Abigail', 'R', 'Thompson'),
-         ('Anthony', 'S', 'Garcia'),
-         ('Ella', 'T', 'Martinez');
    ```
 
 2. Let's create our stored Procedure:
@@ -92,9 +92,8 @@ Here's an example that covers using the Stored procedure Querying functionality 
    END;
    ```
 
-3. Next, we'll need to set up our GraphQL schema to support the stored procedure we created.
-
-   Note: MSSQL Data Source does not care about the casing of your schema properties. Only that they match parameters. So you can use camelCase, PascalCase, or snake_case. It doesn't matter. Optional parameters are also supported, you can ommit them from your query.
+3. Next, we'll need to set up our GraphQL schema to match the stored procedure we created.
+   Note: MSSQL Data Source does not care about the casing of your schema properties. Only that match the parameters. So you can use camelCase, PascalCase, or snake_case... It doesn't matter. Optional parameters are also supported, you can omit these from your query.
 
    ```gql
    import { gql } from 'graphql-tag';
@@ -261,13 +260,13 @@ query ExecuteMyStoredProcedure($input: StoredProcedureInput) {
 
 ## Logging
 
-You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource constructor.
+You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration.
 
 ## Performance
 
 The MSSQLDataSource class maintains separate connection pools for Query and Mutation operations. This ensures that your Query operations don't get blocked by long-running Mutation operations. It also ensures that your Mutation operations don't get blocked by long-running Query operations. This is especially important when using stored procedures that may take a long time to execute.
 
-Because the MSSQLDataSource class needs schema and object definition information to determine stored procedure parameter optionality and modes (input vs output), it must query the database for this information. This is done once per stored procedure and cached for subsequent requests. By default, schemas are cached for 1 hour. This means that the first request to a stored procedure will be slower than subsequent requests. This is a one-time cost and is well worth the benefit of use.
+Because the MSSQLDataSource class needs schema and object definition information to determine stored procedure parameter optionality and modes (input vs output), it must query the database for this information. This is done once per stored procedure and cached for subsequent requests. By default, schemas are cached for 1 hour. This means that the first request to a stored procedure will be slower than subsequent requests. This is a one-time cost and is well worth the benefits.
 
 ### Apollo Server caching
 
