@@ -14,7 +14,7 @@ As a result, I decided to create an MSSQL Data Source that simplifies querying a
 
 - Efficient implementation of [node-mssql](https://www.npmjs.com/package/mssql). Reuses DB connections (ConnectionPools), sanitizes SQL queries (tagged template literals), supports promises, transactions, prepared statements, and others...
 - Implements Command Query Responsibility Segregation (CQRS) through separate connection pools for Query and Mutation operations.
-- Separate configuration for Query and Mutation operations all you to connect to separate databases for queries and mutations, use different credentials, log to separate sources, etc.
+- Separate configuration for Query and Mutation operations allow you to connect to separate databases for queries and mutations, use different credentials, log to separate sources, etc.
 - Stored Procedure schema introspection abstracts away the logic required to execute Stored Procedures. Parameter optionality, types, and default values are automatically determined from the database. Schemas are cached for efficient requests.
 - Extendable, straightforward architecture and integration with Apollo. Easy to add business-layer functionality to query Microsoft SQL Server Databases without the need for an unnecessary abstraction like [Knex.js](https://knexjs.org/).
 - Supports dynamic SQL. Gives you the flexibility to define your GraphQL and Database Schemas as you'd like. We'll take care of the rest.
@@ -115,7 +115,7 @@ Here's an example that covers using the Stored procedure Querying functionality 
    input MyStoredProcedureInput {
      page: Int
      pageSize: Int
-     pageCount: Int # Our output parameter.
+     recordCount: Int # Our output parameter.
    }
 
    """
@@ -259,7 +259,7 @@ query ExecuteMyStoredProcedure($input: StoredProcedureInput) {
 
 ## Logging
 
-You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration. It also comes with a built-in DevLogger that logs informational messages to the console in `tsNODE_ENV === 'development'` environments.
+You can customize logging by implementing your own logger that adheres to the ILogger interface and passing it to the MSSQLDataSource configuration. It also comes with a default `DevConsoleLogger` that logs informational messages to the console in `NODE_ENV !== 'production'` environments.
 
 ![Example logs.](/assets/images/Logs.png)
 
@@ -277,49 +277,29 @@ To maximize the performance of your service, I would recommended you implement A
 import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`#graphql
-"""
-Define our Person type.
-"""
+
 type Person {
   firstName: String!
   middleName: String
   lastName: String!
 }
 
-"""
-Define our stored procedure input arguments type.
-The framework will convert these properties to parameters sent to your stored procedure (MyStoredProcedure).
-The framework supports optional stored procedure parameters. Optional parameters may be omitted from the schema.
-"""
 input MyStoredProcedureInput {
   page: Int
   pageSize: Int
-  pageCount: Int # Our output parameter.
+  recordCount: Int # Our output parameter.
 }
 
 """
-Define our Stored Procedure Result type.
-Represents the results from executing the MyStoredProcedure stored procedure.
+Caching our Stored Procedure result for 240 seconds (4 mins)
 """
 type MyStoredProcedureResult @cacheControl(maxAge: 240) {
-  """
-  The result sets from the stored procedure. In this example, we only care about the first result set (array).
-  However, The framework will automatically map the result sets to the resultSets property.
-  You can define the types for each result set in this property to get typed results for each.
-  """
   resultSets: [[Person!]!]! @cacheControl(maxAge: 240)
-  """
-  The RecordCount Output parameter from our Stored Procedure.
-  The framework will automatically map the output parameters and their values as properties of your Result type.
-  """
+
   recordCount: Int @cacheControl(maxAge: 240)
-  # ... any other output parameters/scalars you want to return from your stored procedure.
 }
 
 type Query {
-  """
-  Define our Stored Procedure Query
-  """
   executeMyStoredProcedure(input: MyStoredProcedureInput): MyStoredProcedureResult!
 }
 
