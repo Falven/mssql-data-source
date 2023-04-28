@@ -60,7 +60,8 @@ export class StoredProcedureManager {
       logSafely(
         logger,
         'info',
-        `\x1b[31mCache miss occurred while retrieving the cached schema for ${storedProcedureName}\x1b[0m`,
+        // Yellow
+        `\x1b[33mCache miss occurred while retrieving the cached schema for ${storedProcedureName}\x1b[0m`,
       );
       schema = await this._storedProcedureMetadataManager.getStoredProcedureParameterSchema(
         storedProcedureName,
@@ -71,6 +72,7 @@ export class StoredProcedureManager {
       logSafely(
         logger,
         'info',
+        // Green
         `\x1b[32mCache hit occurred while retrieving the cached schema for ${storedProcedureName}\x1b[0m`,
       );
     }
@@ -97,10 +99,12 @@ export class StoredProcedureManager {
       logger,
       `Stored Procedure ${storedProcedureName} with parameters`,
       preparedRequest.parameters,
+      // Yellow
       '33m',
     );
     const result = await preparedRequest.execute(storedProcedureName);
-    logExecutionEnd(logger, `Stored Procedure ${storedProcedureName}`, startTime, '33m');
+    // Green
+    logExecutionEnd(logger, `Stored Procedure ${storedProcedureName}`, startTime, '32m');
 
     startTime = performance.now();
     const preparedResult = this.prepareStoredProcedureResult(result);

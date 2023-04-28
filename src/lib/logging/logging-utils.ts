@@ -30,6 +30,7 @@ export const logPerformance = (logger: ILogger, methodName: string, startTime: n
   logSafely(
     logger,
     'info',
+    // Blue
     `\x1b[34mExecution time for ${methodName}: ${elapsedTime} milliseconds.\x1b[0m`,
   );
 };
@@ -45,11 +46,12 @@ export const logExecutionBegin = (
   logger: ILogger,
   fnName: string,
   fnInput: object,
-  ansiCode: string = '36m',
+  ansiCode: string = '36m', // Cyan
 ): void => {
   logSafely(
     logger,
     'info',
+    // Cyan
     `\u001b[${ansiCode}Starting execution of ${fnName}: ${JSON.stringify(
       fnInput,
       null,
@@ -69,7 +71,7 @@ export const logExecutionEnd = (
   logger: ILogger,
   fnName: string,
   fnStartTime: number,
-  ansiCode: string = '36m',
+  ansiCode: string = '36m', // Cyan
 ): void => {
   const elapsedTime = (performance.now() - fnStartTime).toFixed(2);
   logSafely(
