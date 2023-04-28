@@ -99,12 +99,11 @@ export class StoredProcedureManager {
       logger,
       `Stored Procedure ${storedProcedureName} with parameters`,
       preparedRequest.parameters,
-      // Yellow
-      '33m',
+      // Green
+      '32mm',
     );
     const result = await preparedRequest.execute(storedProcedureName);
-    // Green
-    logExecutionEnd(logger, `Stored Procedure ${storedProcedureName}`, startTime, '32m');
+    logExecutionEnd(logger, `Stored Procedure ${storedProcedureName}`, startTime);
 
     startTime = performance.now();
     const preparedResult = this.prepareStoredProcedureResult(result);
