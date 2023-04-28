@@ -100,7 +100,7 @@ export class StoredProcedureManager {
       `Stored Procedure ${storedProcedureName} with parameters`,
       preparedRequest.parameters,
       // Green
-      '32mm',
+      '32m',
     );
     const result = await preparedRequest.execute(storedProcedureName);
 
