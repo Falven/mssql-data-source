@@ -103,7 +103,6 @@ export class StoredProcedureManager {
       '32mm',
     );
     const result = await preparedRequest.execute(storedProcedureName);
-    logExecutionEnd(logger, `Stored Procedure ${storedProcedureName}`, startTime);
 
     startTime = performance.now();
     const preparedResult = this.prepareStoredProcedureResult(result);
