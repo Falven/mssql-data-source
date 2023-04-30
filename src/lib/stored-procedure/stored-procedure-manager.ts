@@ -16,7 +16,7 @@ import {
   type InputParameters,
 } from '../types';
 import { mapDbTypeToDriverType } from '../utils';
-import { logExecutionBegin, logExecutionEnd, logPerformance, logSafely } from '../logging';
+import { logExecutionBegin, logPerformance, logSafely } from '../logging';
 import {
   type StoredProcedureCacheManager,
   type StoredProcedureMetadataManager,
