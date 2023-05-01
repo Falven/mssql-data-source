@@ -167,7 +167,11 @@ export class StoredProcedureManager {
   ): Request {
     const preparedRequest = request;
     for (const parameter of parameters.values()) {
-      const { name, type, mode, value } = parameter;
+      const { name, type, mode, value, defaultValue } = parameter;
+      if (defaultValue !== undefined && value === undefined) {
+        continue;
+      }
+
       const modeEnum = mode;
       if (modeEnum === ParameterMode.IN) {
         preparedRequest.input(name, type, value);

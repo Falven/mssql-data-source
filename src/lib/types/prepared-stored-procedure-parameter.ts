@@ -5,5 +5,5 @@ import type { StoredProcedureParameter, DriverType } from '.';
  */
 export type PreparedStoredProcedureParameter = Omit<StoredProcedureParameter, 'type'> & {
   type: DriverType;
-  value: unknown;
+  value?: unknown;
 };

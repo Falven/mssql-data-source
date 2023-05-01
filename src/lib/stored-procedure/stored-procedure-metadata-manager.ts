@@ -10,14 +10,21 @@ import { convertSqlValueToJsValue } from '../utils';
  */
 export class StoredProcedureMetadataManager {
   /**
-   * Matches the parameters from the Stored Procedure definition.
-   * See https://regex101.com/r/hrjgTb/1 for this regex.
+   * Matches any comments from the Stored Procedure definition.
+   * See https://regex101.com/r/dxA7n0/1 for this regex.
    */
-  private static readonly parameterSectionRegex =
-    /(?<=PROCEDURE).*?(?=(?:AS|FOR\s+REPLICATION)[^\w])/is;
+  private static readonly commentRegex = /(?:\s*-{2}.+\s*$)|(?:\/\*([\s\S]*?)\*\/)/gm;
 
   /**
-   * See https://regex101.com/r/NOSoCm/1 for this regex.
+   * Matches the parameters from the Stored Procedure definition.
+   * See https://regex101.com/r/kCZMLr/1 for this regex.
+   * And https://regex101.com/r/cMsTyT/1 for the Stored Procedure name portion of the regex.
+   */
+  private static readonly parameterSectionRegex =
+    /(?<=(?:CREATE|ALTER)\s+PROCEDURE)\s+((?:((?:\[[\w\s]+\])|(?:\w+))\.)?((?:\[[\w\s]+\])|(?:\w+))\.((?:\[[\w\s]+\])|(?:\w+)))(.*?)(?=(?:AS|FOR\s+REPLICATION)[^\w])/is;
+
+  /**
+   * See https://regex101.com/r/iMEaLb/1 for this regex.
    * Match the individual parameters in the Parameter Definition.
    */
   private static readonly parameterDefinitionRegex = /(@[\w]+)\s+([^\s]+)\s*=\s*([^, ]*),?/gi;
@@ -46,7 +53,7 @@ export class StoredProcedureMetadataManager {
           'NUMERIC_SCALE as scale ' +
           'FROM INFORMATION_SCHEMA.PARAMETERS ' +
           `WHERE SPECIFIC_SCHEMA = '${schemaAndName[0]}' AND SPECIFIC_NAME = '${schemaAndName[1]}';
-              SELECT OBJECT_DEFINITION(OBJECT_ID('${storedProcedureName}')) AS storedProcedureDefinition;`,
+            SELECT OBJECT_DEFINITION(OBJECT_ID('${storedProcedureName}')) AS storedProcedureDefinition;`,
       );
 
       const recordSetLength = result.recordsets.length as number;
@@ -87,15 +94,29 @@ export class StoredProcedureMetadataManager {
 
     const storedProcedureDefinition = schemaResult.recordsets[1][0].storedProcedureDefinition;
 
-    const parameterSection = storedProcedureDefinition.match(
+    const commentStrippedStoredProcedureDefinition = storedProcedureDefinition.replace(
+      StoredProcedureMetadataManager.commentRegex,
+      '',
+    );
+    if (commentStrippedStoredProcedureDefinition === '') {
+      throw new Error(
+        `Could not parse stored procedure comments from definition for stored procedure ${storedProcedureName}.`,
+      );
+    }
+
+    const parameterSection = commentStrippedStoredProcedureDefinition.match(
       StoredProcedureMetadataManager.parameterSectionRegex,
     );
-    if (parameterSection === null || parameterSection.length !== 1) {
+    if (
+      parameterSection === null ||
+      parameterSection.length !== 6 ||
+      parameterSection[1] !== storedProcedureName
+    ) {
       throw new Error(
         `Could not parse stored procedure parameters from definition for stored procedure ${storedProcedureName}.`,
       );
     }
-    const parameterDefinition = parameterSection[0];
+    const parameterDefinition = parameterSection[5];
 
     let parameterDefinitionMatch;
     while (
