@@ -1,6 +1,6 @@
 {
   "name": "mssql-data-source",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A powerful MSSQL DataSource that integrates well with Apollo Server 4.",
   "keywords": [
     "mssql",
