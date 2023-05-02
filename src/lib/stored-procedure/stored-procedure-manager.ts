@@ -227,7 +227,9 @@ export class StoredProcedureManager {
     const output = mapKeys(result.output, (_value, key) => camelCase(key));
 
     const preparedResult = {
+      returnValue: result.returnValue,
       resultSets: resultSets as unknown as T[][],
+      rowsAffected: result.rowsAffected,
       ...output,
     };
     return preparedResult;
