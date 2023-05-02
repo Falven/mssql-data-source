@@ -4,5 +4,7 @@
  * any additional output properties that were returned by the stored procedure.
  */
 export interface IResolverProcedureResult<T> extends Record<string, unknown> {
+  returnValue: number;
   resultSets: T[][];
+  rowsAffected: number[];
 }
