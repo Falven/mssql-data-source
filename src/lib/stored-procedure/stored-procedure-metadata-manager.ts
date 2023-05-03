@@ -10,6 +10,13 @@ import { convertSqlValueToJsValue } from '../utils';
  */
 export class StoredProcedureMetadataManager {
   /**
+   * Regular expression to extract MSSQL stored procedure names.
+   * See https://regex101.com/r/cMsTyT/1 for this regex.
+   */
+  private static readonly storedProcedureNameRegex =
+    /((?:(?:\[([\w\s]+)\]|(\w+))\.)?(?:\[([\w\s]+)\]|(\w+))\.(?:\[([\w\s]+)\]|(\w+)))/i;
+
+  /**
    * Matches any comments from the Stored Procedure definition.
    * See https://regex101.com/r/dxA7n0/1 for this regex.
    */
@@ -17,11 +24,10 @@ export class StoredProcedureMetadataManager {
 
   /**
    * Matches the parameters from the Stored Procedure definition.
-   * See https://regex101.com/r/kCZMLr/1 for this regex.
-   * And https://regex101.com/r/cMsTyT/1 for the Stored Procedure name portion of the regex.
+   * See https://regex101.com/r/4TaTky/1 for this regex.
    */
   private static readonly parameterSectionRegex =
-    /(?<=(?:CREATE|ALTER)\s+PROCEDURE)\s+((?:((?:\[[\w\s]+\])|(?:\w+))\.)?((?:\[[\w\s]+\])|(?:\w+))\.((?:\[[\w\s]+\])|(?:\w+)))(.*?)(?=(?:AS|FOR\s+REPLICATION)[^\w])/is;
+    /(?<=(?:CREATE|ALTER)\s+PROCEDURE)\s+((?:(?:\[([\w\s]+)\]|(\w+))\.)?(?:\[([\w\s]+)\]|(\w+))\.(?:\[([\w\s]+)\]|(\w+)))(.*?)(?=(?:AS|FOR\s+REPLICATION)[^\w])/is;
 
   /**
    * See https://regex101.com/r/iMEaLb/1 for this regex.
@@ -107,16 +113,13 @@ export class StoredProcedureMetadataManager {
     const parameterSection = commentStrippedStoredProcedureDefinition.match(
       StoredProcedureMetadataManager.parameterSectionRegex,
     );
-    if (
-      parameterSection === null ||
-      parameterSection.length !== 6 ||
-      parameterSection[1] !== storedProcedureName
-    ) {
+    if (parameterSection === null || parameterSection.length !== 9) {
       throw new Error(
         `Could not parse stored procedure parameters from definition for stored procedure ${storedProcedureName}.`,
       );
     }
-    const parameterDefinition = parameterSection[5];
+
+    const parameterDefinition = parameterSection[8];
 
     let parameterDefinitionMatch;
     while (
