@@ -25,7 +25,7 @@ export class DevConsoleLogger implements ILogger {
   }
 
   /**
-   * Logs a warning message to the console.
+   * Logs an error message to the console.
    * @param {unknown} message The message to log
    * @param {unknown[]} optionalParams Optional parameters to log
    */
