@@ -1,7 +1,5 @@
 import { performance } from 'perf_hooks';
 
-import { replace } from 'lodash';
-
 import type { ILogger } from '../types';
 
 /**
@@ -94,8 +92,8 @@ const replacer = (key: string, value: any): unknown => {
     return { __type: 'Set', value: Array.from(value.values()) };
   } else if (value instanceof RegExp) {
     return { __type: 'RegExp', value: value.toString() };
-  } else if (value instanceof Error) {
-    return { __type: 'Error', value: value.message };
+  } else if (value instanceof Buffer) {
+    return { __type: 'Buffer', value: value.toString('base64') };
   } else {
     return value;
   }
