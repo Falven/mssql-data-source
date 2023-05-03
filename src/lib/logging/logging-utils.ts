@@ -1,5 +1,7 @@
 import { performance } from 'perf_hooks';
 
+import { replace } from 'lodash';
+
 import type { ILogger } from '../types';
 
 /**
@@ -45,7 +47,7 @@ export const logPerformance = (logger: ILogger, methodName: string, startTime: n
 export const logExecutionBegin = (
   logger: ILogger,
   fnName: string,
-  fnInput: object,
+  fnInput: { toString: () => string },
   ansiCode: string = '36m', // Cyan
 ): void => {
   logSafely(
@@ -54,7 +56,7 @@ export const logExecutionBegin = (
     // Cyan
     `\u001b[${ansiCode}Starting execution of ${fnName}: ${JSON.stringify(
       fnInput,
-      null,
+      replacer,
       0,
     )}\u001b[0m`,
   );
@@ -79,4 +81,22 @@ export const logExecutionEnd = (
     'info',
     `\u001b[${ansiCode}Finished executing ${fnName} completed in ${elapsedTime}ms\u001b[0m`,
   );
+};
+
+const replacer = (key: string, value: any): unknown => {
+  if (typeof value === 'bigint') {
+    return { __type: 'BigInt', value: value.toString() };
+  } else if (value instanceof Date) {
+    return { __type: 'Date', value: value.toISOString() };
+  } else if (value instanceof Map) {
+    return { __type: 'Map', value: Array.from(value.entries()) };
+  } else if (value instanceof Set) {
+    return { __type: 'Set', value: Array.from(value.values()) };
+  } else if (value instanceof RegExp) {
+    return { __type: 'RegExp', value: value.toString() };
+  } else if (value instanceof Error) {
+    return { __type: 'Error', value: value.message };
+  } else {
+    return value;
+  }
 };

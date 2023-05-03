@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@apollo/utils.keyvaluecache": "^3.0.0",
+    "graphql-scalars": "^1.21.3",
     "lodash": "^4.17.21",
     "msnodesqlv8": "^2",
     "mssql": "^9.1.1"
