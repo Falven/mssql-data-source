@@ -4,6 +4,9 @@ dependencies:
   '@apollo/utils.keyvaluecache':
     specifier: ^3.0.0
     version: 3.0.0
+  graphql:
+    specifier: ^16.6.0
+    version: 16.6.0
   graphql-scalars:
     specifier: ^1.21.3
     version: 1.21.3(graphql@16.6.0)

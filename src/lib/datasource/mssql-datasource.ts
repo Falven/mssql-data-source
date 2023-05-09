@@ -1,4 +1,5 @@
 import type { Request } from 'mssql/msnodesqlv8';
+import { type GraphQLResolveInfo } from 'graphql';
 
 import { DevConsoleLogger, logExecutionBegin, logExecutionEnd, logSafely } from '../logging';
 import { DatabaseExecutor } from '../executor';
@@ -72,11 +73,14 @@ export class MSSQLDataSource {
    * @template T - This type parameter represents the type of the value returned by the resolver procedure.
    * @param {string} storedProcedureName - The name of the stored procedure to execute.
    * @param {StoredProcedureInput} input - The input parameters for the stored procedure.
+   * @param {GraphQLResolveInfo | undefined} info - If provided, will be used to case-insensitively map the stored
+   * procedure results to the correct schema field names.
    * @returns A Promise that resolves to the result of the stored procedure execution.
    */
   public async executeStoredProcedureQuery<T>(
     storedProcedureName: string,
     input: InputParameters,
+    info?: GraphQLResolveInfo,
   ): Promise<IResolverProcedureResult<T>> {
     const startTime = performance.now();
     const logger = this._queryLogger;
@@ -90,6 +94,7 @@ export class MSSQLDataSource {
           input,
           request,
           logger,
+          info,
         ),
       logger,
     );
@@ -105,11 +110,14 @@ export class MSSQLDataSource {
    * @template T - This type parameter represents the type of the value returned by the resolver procedure.
    * @param {string} storedProcedureName - The name of the stored procedure to execute.
    * @param {StoredProcedureInput} input - The input parameters for the stored procedure.
+   * @param {GraphQLResolveInfo | undefined} info - If provided, will be used to case-insensitively map the stored
+   * procedure results to the correct schema field names.
    * @returns A Promise that resolves to the result of the stored procedure execution.
    */
   public async executeStoredProcedureMutation<T>(
     storedProcedureName: string,
     input: InputParameters,
+    info?: GraphQLResolveInfo,
   ): Promise<IResolverProcedureResult<T>> {
     const startTime = performance.now();
     const logger = this._mutationLogger;
@@ -121,6 +129,7 @@ export class MSSQLDataSource {
           input,
           request,
           logger,
+          info,
         ),
       logger,
     );

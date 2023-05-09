@@ -1,10 +1,11 @@
-import { camelCase, mapKeys } from 'lodash';
+import { camelCase } from 'lodash';
 import {
   type Request,
   type IProcedureResult,
   type IResult,
   type IRecordSet,
 } from 'mssql/msnodesqlv8';
+import { type GraphQLResolveInfo } from 'graphql';
 
 import {
   type DriverType,
@@ -22,6 +23,7 @@ import {
   type StoredProcedureMetadataManager,
 } from '../stored-procedure';
 import { type IResolverProcedureResult } from '../types/i-resolver-procedure-result';
+import { getNodeSelectionSetNames, getFieldNamesExcludingNode } from '../utils/graphql-helper';
 
 /**
  * StoredProcedureManager provides methods to interact
@@ -43,6 +45,8 @@ export class StoredProcedureManager {
    * @param {string} storedProcedureName - The name of the stored procedure to execute.
    * @param {StoredProcedureInput} input - The input parameters for the stored procedure.
    * @param {Request} request - The request to execute the stored procedure.
+   * @param {GraphQLResolveInfo | undefined} info - If provided, will be used to case-insensitively map the stored
+   * procedure results to the correct schema field names.
    * @param {ILogger} logger - The logger to use for logging.
    * @returns A Promise that resolves to the result of the stored procedure execution.
    */
@@ -51,6 +55,7 @@ export class StoredProcedureManager {
     input: InputParameters,
     request: Request,
     logger: ILogger,
+    info?: GraphQLResolveInfo,
   ): Promise<IResolverProcedureResult<T>> {
     let startTime = performance.now();
     let schema = (await this._storedProcedureCacheManager.tryGetFromCache(storedProcedureName)) as
@@ -105,7 +110,7 @@ export class StoredProcedureManager {
     const result = await preparedRequest.execute(storedProcedureName);
 
     startTime = performance.now();
-    const preparedResult = this.prepareStoredProcedureResult(result);
+    const preparedResult = this.prepareStoredProcedureResult(result, info);
     logPerformance(logger, 'prepareStoredProcedureResult', startTime);
 
     return preparedResult;
@@ -212,23 +217,54 @@ export class StoredProcedureManager {
   }
 
   /**
+   * Maps the keys of an object based on the provided mapping.
+   * @template T - The type of the original object.
+   * @param {T} obj - The object whose keys need to be mapped.
+   * @param {Record<string, string>} mapping - A dictionary containing the mapping of the original keys to the new keys.
+   * @returns {T} A new object with the keys mapped according to the provided mapping.
+   */
+  private mapKeysWithMapping<T extends Record<string, unknown>>(
+    obj: T,
+    mapping: Record<string, string>,
+  ): T {
+    const result: Record<string, unknown> = {};
+    for (const key in obj) {
+      const mappedKey = mapping[key.toLowerCase()] ?? camelCase(key);
+      result[mappedKey] = obj[key];
+    }
+    return result as T;
+  }
+
+  /**
    * Prepares the stored procedure result into a GraphQL result object.
    * @param {IProcedureResult} result - The stored procedure result.
+   * @param {GraphQLResolveInfo | undefined} info - If provided, will be used to case-insensitively map the stored
+   * procedure results to the correct schema field names.
    * @returns {IResolverProcedureResult} A prepared GraphQL result object.
    */
   private prepareStoredProcedureResult<T extends Record<string, unknown>>(
     result: IProcedureResult<T>,
+    info?: GraphQLResolveInfo,
   ): IResolverProcedureResult<T> {
+    const { resultSetFields, outputFields } =
+      info !== undefined
+        ? {
+            resultSetFields: getNodeSelectionSetNames(info, 'resultSets'),
+            outputFields: getFieldNamesExcludingNode(info, 'resultSets'),
+          }
+        : { resultSetFields: {}, outputFields: {} };
+
     const resultSets = result.recordsets.map((recordset: IRecordSet<Record<string, unknown>>) => {
       return recordset.map((record: Record<string, unknown>) =>
-        mapKeys(record, (_value: unknown, key: string) => camelCase(key)),
+        this.mapKeysWithMapping(record, resultSetFields),
       );
     });
-    const output = mapKeys(result.output, (_value, key) => camelCase(key));
+
+    const output = this.mapKeysWithMapping(result.output, outputFields);
 
     const preparedResult = {
       returnValue: result.returnValue,
-      resultSets: resultSets as unknown as T[][],
+      resultSets: resultSets as T[][],
       rowsAffected: result.rowsAffected,
       ...output,
     };
