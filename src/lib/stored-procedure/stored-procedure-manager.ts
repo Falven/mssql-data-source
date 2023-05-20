@@ -16,7 +16,7 @@ import {
   type ILogger,
   type InputParameters,
 } from '../types';
-import { mapDbTypeToDriverType } from '../utils';
+import { mapDbTypeToDriverType, replacer } from '../utils';
 import { logExecutionBegin, logPerformance, logSafely } from '../logging';
 import {
   type StoredProcedureCacheManager,
@@ -207,7 +207,9 @@ export class StoredProcedureManager {
     const missingLength = missingRequiredParameters.length;
     if (missingLength > 0) {
       throw new Error(
-        `Missing ${missingLength} required parameters: ${missingRequiredParameters.join(', ')}.`,
+        `Missing ${missingLength} required parameters: ${missingRequiredParameters
+          .map((param) => JSON.stringify(param, replacer, 0))
+          .join(', ')}.`,
       );
     }
 
