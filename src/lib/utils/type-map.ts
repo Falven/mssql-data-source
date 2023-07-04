@@ -11,6 +11,7 @@ import {
   type ISqlTypeWithScale,
   type ISqlTypeWithTvpType,
   TYPES,
+  MAX,
 } from 'mssql';
 
 import type { StoredProcedureParameter } from '../types';
@@ -95,7 +96,7 @@ export const mapDbTypeToDriverType = ({
     if (isSqlTypeFactoryWithNoParams(typeFactory)) {
       return typeFactory();
     } else if (isSqlTypeFactoryWithLength(typeFactory)) {
-      return (typeFactory as ISqlTypeFactoryWithLength)(length);
+      return (typeFactory as ISqlTypeFactoryWithLength)(length === -1 ? MAX : length);
     } else if (isSqlTypeFactoryWithScale(typeFactory)) {
       return (typeFactory as ISqlTypeFactoryWithScale)(scale);
     } else if (isSqlTypeFactoryWithPrecisionScale(typeFactory)) {
