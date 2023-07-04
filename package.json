@@ -1,6 +1,6 @@
 {
   "name": "mssql-data-source",
-  "version": "1.1.2",
+  "version": "1.1.5",
   "description": "A powerful MSSQL DataSource that integrates well with Apollo Server 4.",
   "keywords": [
     "mssql",
@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@apollo/utils.keyvaluecache": "^3.0.0",
-    "graphql": "^16.6.0",
-    "graphql-scalars": "^1.21.3",
+    "graphql": "^16.7.1",
+    "graphql-scalars": "^1.22.2",
     "lodash": "^4.17.21",
     "msnodesqlv8": "^2",
     "mssql": "^9.1.1"
