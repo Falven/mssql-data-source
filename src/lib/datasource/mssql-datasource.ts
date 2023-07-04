@@ -1,4 +1,4 @@
-import type { Request } from 'mssql/msnodesqlv8';
+import type { Request } from 'mssql';
 import { type GraphQLResolveInfo } from 'graphql';
 
 import { DevConsoleLogger, logExecutionBegin, logExecutionEnd, logSafely } from '../logging';

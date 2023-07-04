@@ -1,4 +1,4 @@
-import { type IResult, type Request } from 'mssql/msnodesqlv8';
+import { type IResult, type Request } from 'mssql';
 
 import type { StoredProcedureParameter, StoredProcedureSchema, ILogger } from '../types';
 import { type DatabaseExecutor } from '../executor';

@@ -11,7 +11,7 @@ import {
   type ISqlTypeWithScale,
   type ISqlTypeWithTvpType,
   TYPES,
-} from 'mssql/msnodesqlv8';
+} from 'mssql';
 
 import type { StoredProcedureParameter } from '../types';
 

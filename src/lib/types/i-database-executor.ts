@@ -1,4 +1,4 @@
-import type { Request } from 'mssql/msnodesqlv8';
+import type { Request } from 'mssql';
 
 import type { ILogger } from '.';
 

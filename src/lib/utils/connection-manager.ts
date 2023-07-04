@@ -1,4 +1,4 @@
-import { ConnectionPool } from 'mssql/msnodesqlv8';
+import { ConnectionPool } from 'mssql';
 
 import type { MSSQLConfig } from '../types';
 

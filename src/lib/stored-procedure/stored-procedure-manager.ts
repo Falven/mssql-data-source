@@ -1,10 +1,5 @@
 import { camelCase } from 'lodash';
-import {
-  type Request,
-  type IProcedureResult,
-  type IResult,
-  type IRecordSet,
-} from 'mssql/msnodesqlv8';
+import { type Request, type IProcedureResult, type IResult, type IRecordSet } from 'mssql';
 import { type GraphQLResolveInfo } from 'graphql';
 
 import {

@@ -1,6 +1,6 @@
 import { performance } from 'perf_hooks';
 
-import { type ConnectionPool, Request } from 'mssql/msnodesqlv8';
+import { type ConnectionPool, Request } from 'mssql';
 
 import type { ILogger, IDatabaseExecutor } from '../types';
 import { logPerformance } from '../logging';
