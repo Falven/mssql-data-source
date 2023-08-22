@@ -99,6 +99,11 @@ export class StoredProcedureMetadataManager {
       );
 
     const storedProcedureDefinition = schemaResult.recordsets[1][0].storedProcedureDefinition;
+    if (storedProcedureDefinition == null) {
+      throw new Error(
+        `Could not parse stored procedure definition for stored procedure ${storedProcedureName}.`,
+      );
+    }
 
     const commentStrippedStoredProcedureDefinition = storedProcedureDefinition.replace(
       StoredProcedureMetadataManager.commentRegex,
