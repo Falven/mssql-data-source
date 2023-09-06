@@ -2,11 +2,7 @@
   "name": "mssql-data-source",
   "version": "1.2.0",
   "description": "A powerful MSSQL DataSource that integrates well with Apollo Server 4.",
-  "keywords": [
-    "mssql",
-    "apollo",
-    "stored procedure"
-  ],
+  "keywords": ["mssql", "apollo", "stored procedure"],
   "homepage": "https://github.com/Falven/mssql-data-source/tree/main",
   "bugs": {
     "url": "https://github.com/Falven/mssql-data-source/issues"
@@ -15,11 +11,7 @@
   "author": "Falven",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
-  "files": [
-    "dist/src/**/*.js",
-    "dist/src/**/*.ts",
-    "dist/src/**/*.map"
-  ],
+  "files": ["dist/src/**/*.js", "dist/src/**/*.ts", "dist/src/**/*.map"],
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
