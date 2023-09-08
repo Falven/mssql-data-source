@@ -1,7 +1,6 @@
 {
   "name": "mssql-data-source",
-  "version": "1.3.0",
-  "type": "module",
+  "version": "1.4.0",
   "private": false,
   "description": "A powerful MSSQL DataSource that integrates well with Apollo Server 4.",
   "keywords": [
