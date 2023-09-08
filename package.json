@@ -25,8 +25,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "ts-node --esm scripts/esbuild.config.mts",
-    "postbuild": "tsc",
+    "build": "ts-node --esm scripts/esbuild.config.mts && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
