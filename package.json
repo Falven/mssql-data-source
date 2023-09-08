@@ -32,8 +32,6 @@
   },
   "dependencies": {
     "@apollo/utils.keyvaluecache": "^3.0.0",
-    "@esbuild-plugins/esm-externals": "^0.1.2",
-    "esbuild-node-externals": "^1.9.0",
     "graphql": "^16.7.1",
     "graphql-scalars": "^1.22.2",
     "lodash": "^4.17.21",
