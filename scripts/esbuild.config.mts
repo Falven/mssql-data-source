@@ -24,7 +24,6 @@ const appOptions: Partial<BuildOptions> = {
       optionalDependencies: true,
     }),
   ],
-  external: ['tiktoken'],
 };
 
 const libOptions: Partial<BuildOptions> = {
@@ -33,7 +32,8 @@ const libOptions: Partial<BuildOptions> = {
 };
 
 const devOptions: Partial<BuildOptions> = {
-  sourcemap: 'external',
+  sourcemap: 'linked',
+  sourcesContent: true,
   logLevel: 'info',
 };
 
@@ -50,13 +50,9 @@ const commonOptions: BuildOptions = {
   ...(args.includes('--dev') ? devOptions : prodOptions),
 };
 
-await build(commonOptions);
-
 if (args.includes('--watch')) {
-  const buildContext = await context({
-    ...commonOptions,
-    sourcemap: true,
-    logLevel: 'info',
-  });
-  await buildContext.watch();
+  const { watch } = await context(commonOptions);
+  await watch();
+} else {
+  await build(commonOptions);
 }

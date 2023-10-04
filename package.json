@@ -29,8 +29,7 @@
     "build:cjs": "pnpm ts-node --esm ./scripts/esbuild.config.mts --lib",
     "build:tsc": "tsc --emitDeclarationOnly",
     "build": "concurrently --names \"ESM,CJS,TSC\" -c \"yellow.bold,white.bold,blue.bold\" \"pnpm:build:esm\" \"pnpm:build:cjs\" \"pnpm:build:tsc\"",
-    "build:dev": "concurrently --names \"ESM,CJS,TSC\" -c \"yellow.bold,white.bold,blue.bold\" \"pnpm:build:esm --dev\" \"pnpm:build:cjs --dev\" \"pnpm:build:tsc\"",
-    "watch": "esbuild src/index.ts --bundle --target=node18 --platform=node --format=esm --outfile=dist/esm/index.mjs --sourcemap --watch"
+    "build:dev": "concurrently --names \"ESM,CJS,TSC\" -c \"yellow.bold,white.bold,blue.bold\" \"pnpm:build:esm --dev\" \"pnpm:build:cjs --dev\" \"pnpm:build:tsc\""
   },
   "dependencies": {
     "@apollo/utils.keyvaluecache": "^3.0.0",
